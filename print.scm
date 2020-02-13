@@ -1,5 +1,6 @@
 (define-module (jlib print)
   #:export (println
+            ansi-code
             with-color
             with-foreground
             with-background))
