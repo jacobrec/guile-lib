@@ -18,17 +18,21 @@
             parse/float
             parse/quoted-string
 
+            parse/between
+
             ignore-whitespace))
 
 (define ignore-whitespace (make-parameter #t))
 
 (define (parse/lit value)
-  (define l (string-length value))
-  (λ (str)
-    (define tstr (if (ignore-whitespace) (string-trim str) str))
-    (if (string= value (substring tstr 0 l))
-      (values value (substring tstr l))
-      (values 'parse-error str))))
+ (define l (string-length value))
+ (λ (str)
+   (define tstr (if (ignore-whitespace) (string-trim str) str))
+   (if (and
+        (>= (string-length tstr) l)
+        (string= value (substring tstr 0 l)))
+    (values value (substring tstr l))
+    (values 'parse-error str))))
 
 (define (parse/or2 v1 v2)
   (λ (str)
@@ -100,25 +104,28 @@
 
 (define (parse/int)
   (λ (str)
-    (ignore-whitespace #f)
-    ((parse/apply
-      (parse/+ (parse/digit))
-      (λ (parsed)
-        (string->number (apply string-append parsed))))
-     str)))
+    (define tstr (if (ignore-whitespace) (string-trim str) str))
+    (parameterize ((ignore-whitespace #f))
+      ((parse/apply
+        (parse/+ (parse/digit))
+        (λ (parsed)
+          (string->number (apply string-append parsed))))
+       tstr))))
 
 (define (parse/float)
- (λ (str)
-   (ignore-whitespace #f)
-   (let*-values (((res str) ((parse/int) str))
-                 ((res2 str) ((parse/and2 (parse/lit ".") (parse/int)) str)))
-     (define fstr (format #f "~A.~A"
-                         (if (eq? res 'parse-error) "0" res)
-                         (if (eq? res2 'parse-error) "0" (cdr res2))))
-     (values (if (eq? res res2)
-                 'parse-error
-                 (string->number fstr))
-             str))))
+  (λ (str)
+   (define tstr (if (ignore-whitespace) (string-trim str) str))
+   ;(format #t "parsing float from: ~A~%" tstr)
+   (parameterize ((ignore-whitespace #f))
+     (let*-values (((res tstr) ((parse/int) tstr))
+                   ((res2 tstr) ((parse/and2 (parse/lit ".") (parse/int)) tstr)))
+      (define fstr (format #f "~A.~A"
+                          (if (eq? res 'parse-error) "0" res)
+                          (if (eq? res2 'parse-error) "0" (cdr res2))))
+      (values (if (eq? res res2)
+                  'parse-error
+                  (string->number fstr))
+              tstr)))))
 
 (define* (parse/quoted-string #:optional (quote-lit "\"") (escape-lit "\\"))
   (define l (string-length quote-lit))
@@ -133,4 +140,10 @@
        (loop (substring str l) '())
        (values 'parse-error str))))
 
+(define (parse/between left middle right)
+  (parse/apply
+    (parse/and left middle right)
+    (λ (parsed) (cadr parsed))))
+
 ; (format #t "~a" ((parse/quoted-string) "\"hello\\\"\""))
+; ((parse/int) "12")
