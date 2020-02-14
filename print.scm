@@ -2,7 +2,14 @@
   #:use-module (ice-9 format)
   #:export (println
             ansi-code
+            ansi-code-list
+
+            colors
+            effects
+
             with-color
+            with-effect
+            with-effects
             with-foreground
             with-background))
 
@@ -11,8 +18,23 @@
     (#:BLU . 4) (#:MAG . 5) (#:CYN . 6) (#:WHT . 7)
     (#:RST . 9)))
 
+(define effects
+  '((#:RST . 0)
+    (#:BOLD . 1)
+    (#:FAINT . 2)
+    (#:ITALIC . 3)
+    (#:UNDERLINE . 4)
+    (#:BLINK . 5)
+    (#:FBLINK . 6)
+    (#:REVERSE . 7)
+    (#:CONCEAL . 8)
+    (#:STRIKE . 9)))
+
 (define (println . items)
   (format #t "~{~A~^ ~}~%" items))
+
+(define (ansi-code-list l)
+  (apply ansi-code l))
 
 (define (ansi-code val . rest)
   (define (inner val . rest)
@@ -24,16 +46,15 @@
   (unless (null? rest)
     (apply inner rest)))
 
-
 (define-macro (with-color fg bg fn)
-  `(begin
-     (ansi-code (+ 30 (assoc-ref colors ,fg))
-                (+ 40 (assoc-ref colors ,bg))
-                #\m)
-     ,fn
-     (ansi-code (+ 30 (assoc-ref colors #:RST))
-                (+ 40 (assoc-ref colors #:RST))
-                #\m)))
+ `(begin
+    (ansi-code (+ 30 (assoc-ref colors ,fg))
+               (+ 40 (assoc-ref colors ,bg))
+               #\m)
+    ,fn
+    (ansi-code (+ 30 (assoc-ref colors #:RST))
+               (+ 40 (assoc-ref colors #:RST))
+               #\m)))
 
 (define-macro (with-foreground fg fn)
   `(begin
@@ -47,6 +68,20 @@
      ,fn
      (ansi-code (+ 40 (assoc-ref colors #:RST)) #\m)))
 
+(define-macro (with-effect effect fn)
+  `(begin
+     (ansi-code (assoc-ref effects ,effect) #\m)
+     ,fn
+     (ansi-code (assoc-ref effects #:RST) #\m)))
+
+(define-macro (with-effects teffects fn)
+  `(begin
+     (ansi-code-list (append
+                      (map (λ (x) (assoc-ref effects x)) ,teffects)
+                      (list #\m)))
+     ,fn
+     (ansi-code (assoc-ref effects #:RST) #\m)))
+
 ; Usage example
 ; (with-color #:YEL #:BLU (display "Hello, World!"))
 ; (println)
@@ -54,3 +89,4 @@
 ; (println)
 ; (with-background #:BLU (display "Hello, World!"))
 ; (println)
+
