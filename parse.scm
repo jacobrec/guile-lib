@@ -150,7 +150,9 @@
 (define (parse/until until)
   (λ (str)
     (define (loop str acc)
-      (if (not (eq? 'parse-error (until str)))
+      (if (or (= 0 (string-length str))
+           (not (eq? 'parse-error (until str))))
         (string-concatenate-reverse acc)
         (loop (string-drop str 1) (cons (string-take str 1) acc))))
     (loop str '())))
+
