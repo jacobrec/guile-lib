@@ -153,7 +153,7 @@
     (define (loop str acc)
       (if (or (= 0 (string-length str))
            (not (eq? 'parse-error (until str))))
-        (string-concatenate-reverse acc)
+        (values (string-concatenate-reverse acc) str)
         (loop (string-drop str 1) (cons (string-take str 1) acc))))
     (loop str '())))
 
