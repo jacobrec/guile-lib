@@ -1,6 +1,7 @@
 (define-module (jlib parse)
   #:use-module (srfi srfi-11) ; for let-values
   #:use-module (jlib strings) ; for starts-with
+  #:use-module (jlib print)   ; for println
   #:export (parse/lit
             parse/and
             parse/or
@@ -19,6 +20,7 @@
             parse/quoted-string
 
             parse/between
+            parse/until
 
             ignore-whitespace))
 
@@ -145,5 +147,10 @@
     (parse/and left middle right)
     (λ (parsed) (cadr parsed))))
 
-; (format #t "~a" ((parse/quoted-string) "\"hello\\\"\""))
-; ((parse/int) "12")
+(define (parse/until until)
+  (λ (str)
+    (define (loop str acc)
+      (if (not (eq? 'parse-error (until str)))
+        (string-concatenate-reverse acc)
+        (loop (string-drop str 1) (cons (string-take str 1) acc))))
+    (loop str '())))
