@@ -1,4 +1,5 @@
 (define-module (jlib print)
+  #:use-module (ice-9 format)
   #:export (println
             ansi-code
             with-color
