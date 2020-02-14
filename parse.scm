@@ -13,6 +13,7 @@
 
             parse/and_lit
             parse/or_lit
+            parse/until_lit
 
             parse/digit
             parse/int
@@ -155,4 +156,7 @@
         (string-concatenate-reverse acc)
         (loop (string-drop str 1) (cons (string-take str 1) acc))))
     (loop str '())))
+
+(define (parse/until_lit lit)
+  (parse/until (parse/lit lit)))
 
