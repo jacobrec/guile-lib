@@ -23,6 +23,9 @@
             parse/between
             parse/until
 
+            parse/nil
+            parse/none
+
             ignore-whitespace))
 
 (define ignore-whitespace (make-parameter #t))
@@ -54,9 +57,15 @@
             (values 'parse-error str)
             (values (cons parsed parsed2) res))))))
 
+;; matches anything but consumes no tokens
 (define (parse/nil)
   (λ (str)
     (values '() str)))
+
+;; matches nothing and consumes no tokens
+(define (parse/none)
+  (lambda (str)
+    (values 'parse-error str)))
 
 (define (parse/or v1 . rest)
   (if (null? rest) v1
