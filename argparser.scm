@@ -4,6 +4,27 @@
   #:use-module (jlib print)
   #:export (parseargs))
 
+;; TODO: allow multiple short flags like -vvv
+#|
+Useage:
+(parseargs
+  '((#:num "z" "zebra")
+    (#:str "y" "yellow")
+    (#:bool "x" "xray")))
+This will return a alist in this form
+'((zebra . #f) (yellow . #f) (xray . 0))
+
+The key is always the long name, the value depends on the type.
+For bool: value is the number of times the flag appears
+For int: value is #f if the name never appears, or the associated
+         value is not a number. Otherwise, its a number representing
+         the desired flag eg. -z=2, --zebra=2, -z 2, or --zebra 2 will
+         all parse to 2
+For str: value is #f if the name never appears. Otherwise, its a
+         string representing the desired flag.
+         eg. -z=2, --zebra=2, -z 2, or --zebra 2 will all parse to 2
+|#
+
 (define (parse/prefix short long)
   (define ss (string-append "-" short))
   (define sl (string-append "--" long))
