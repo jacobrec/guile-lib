@@ -1,6 +1,7 @@
 (define-module (jlib print)
   #:use-module (ice-9 format)
   #:export (println
+            print
             ansi-code
             ansi-code-list
 
@@ -29,6 +30,9 @@
     (#:REVERSE . 7)
     (#:CONCEAL . 8)
     (#:STRIKE . 9)))
+
+(define (print . items)
+  (format #t "~{~A~^ ~}" items))
 
 (define (println . items)
   (format #t "~{~A~^ ~}~%" items))
