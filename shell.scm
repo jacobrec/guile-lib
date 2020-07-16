@@ -1,0 +1,10 @@
+(define-module (jlib shell)
+  #:use-module (ice-9 popen)
+  #:use-module (ice-9 textual-ports)
+  #:export (shell))
+
+(define (shell cmd)
+  (let* ((port (open-input-pipe cmd))
+         (str  (get-string-all port)))
+    (close-pipe port)
+    (string-trim-right str)))
