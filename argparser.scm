@@ -5,6 +5,7 @@
   #:export (parseargs))
 
 ;; TODO: allow multiple short flags like -vvv
+;; TODO: allow anonymus items
 #|
 Useage:
 (parseargs

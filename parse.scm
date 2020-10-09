@@ -14,6 +14,7 @@
             parse/and_lit
             parse/or_lit
             parse/until_lit
+            parse/alias_lit
 
             parse/digit
             parse/int
@@ -83,6 +84,13 @@
 (define (parse/and_lit . rest)
   (apply parse/and (map (λ (v) (parse/lit v))
                         rest)))
+
+;; needs longest ones to be at end
+(define (parse/alias_lit v1 . rest)
+  (parse/apply
+   (apply parse/or_lit (reverse (cons v1 rest)))
+   (lambda (x) v1)))
+
 
 (define (parse/digit)
   (parse/or_lit "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"))
