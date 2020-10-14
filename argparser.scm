@@ -1,11 +1,12 @@
 (define-module (jlib argparser)
   #:use-module (srfi srfi-1)
   #:use-module (jlib parse)
+  #:use-module (jlib strings)
+  #:use-module (jlib lists)
   #:use-module (jlib print)
   #:export (parseargs))
 
 ;; TODO: allow multiple short flags like -vvv
-;; TODO: allow anonymus items
 #|
 Useage:
 (parseargs
@@ -83,5 +84,30 @@ For str: value is #f if the name never appears. Otherwise, its a
       ((#:str) (parse-str short full))
       ((#:num) (parse-int short full)))))
 
+(define (calc-anon takers data)
+  (if (null? data)
+    '()
+    (if (any
+         (lambda (x) (starts-with (car data) x))
+         takers)
+      (if (string-contains (car data) "=")
+          (calc-anon takers (cdr data))
+          (calc-anon takers (cddr data)))
+      (cons (car data) (calc-anon takers (cdr data))))))
+
+(define (anon ops)
+  (define takers
+    (flatten
+     (map (lambda (x)
+            (list
+             (string-append "-" (second x))
+             (string-append "--" (third x))))
+          ops)))
+  (define data (cdr (command-line)))
+  (calc-anon takers data))
+
+
 (define (parseargs ops)
-  (map parse-op ops))
+  (cons
+   `(anon . ,(anon ops))
+   (map parse-op ops)))

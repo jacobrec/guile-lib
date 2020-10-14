@@ -27,17 +27,20 @@
             parse/nil
             parse/none
 
-            ignore-whitespace))
+            ignore-whitespace
+            ignore-case))
 
 (define ignore-whitespace (make-parameter #t))
+(define ignore-case (make-parameter #f))
 
 (define (parse/lit value)
  (define l (string-length value))
  (λ (str)
+   (define s= (if (ignore-case) string-ci=? string=?))
    (define tstr (if (ignore-whitespace) (string-trim str) str))
    (if (and
         (>= (string-length tstr) l)
-        (string= value (substring tstr 0 l)))
+        (s= value (substring tstr 0 l)))
     (values value (substring tstr l))
     (values 'parse-error str))))
 

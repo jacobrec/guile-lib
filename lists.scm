@@ -1,6 +1,13 @@
 (define-module (jlib lists)
-  #:export (cartisian-product))
+  #:export (cartisian-product
+            flatten))
 
+
+(define (flatten x)
+    (cond ((null? x) '())
+          ((not (pair? x)) (list x))
+          (else (append (flatten (car x))
+                        (flatten (cdr x))))))
 
 (define (cartisian-product l1 . rest)
   (define (cp acc l1 . rest)

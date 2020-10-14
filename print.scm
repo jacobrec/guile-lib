@@ -2,6 +2,7 @@
   #:use-module (ice-9 format)
   #:export (println
             print
+            writeln
             ansi-code
             ansi-code-list
 
@@ -13,6 +14,10 @@
             with-effects
             with-foreground
             with-background))
+
+(define (writeln x)
+  (write x)
+  (newline))
 
 (define colors
   '((#:BLK . 0) (#:RED . 1) (#:GRN . 2) (#:YEL . 3)
