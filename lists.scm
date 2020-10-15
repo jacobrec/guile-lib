@@ -1,6 +1,7 @@
 (define-module (jlib lists)
   #:export (cartisian-product
-            flatten))
+            flatten
+            assoc-get))
 
 
 (define (flatten x)
@@ -21,3 +22,8 @@
                            l1))
             rest)))
   (apply cp (map (λ (x) (list x)) l1) rest))
+
+
+(define* (assoc-get key alist #:optional default)
+  (define v (assoc key alist))
+  (if v (cdr v) default))
