@@ -18,9 +18,12 @@
 
             couch-all-documents
             couch-new-document
+            couch-put-document
             couch-get-document
+            couch-delete-document
+
             couch-get-document-by-field
-            couch-delete-document))
+            couch-set-field-of-document))
 
 ;;; CouchDB does not support Authorization: basic, it
 ;;; requires Authorization: Basic, despite the rfc saying
@@ -106,12 +109,17 @@
 (define (couch-delete-db dbs db) (delete dbs db))
 
 (define (couch-all-documents dbs db) (get dbs (format #f "~a/_all_docs" db)))
+(define (couch-put-document dbs db id item)
+  (put dbs (format #f "~a/~a" db id) (scm->json-string item)))
 (define (couch-new-document dbs db item)
   (define id (uuidgen))
-  (define res (put dbs (format #f "~a/~a" db id) (scm->json-string item)))
+  (define res (couch-put-document dbs db id item))
   (if (error? res) res id))
 
 (define (couch-get-document dbs db id) (get dbs (format #f "~a/~a" db id)))
+(define (couch-delete-document dbs db id rev)
+  (delete dbs (format #f "~a/~a?rev=~a" db id rev)))
+
 (define* (couch-get-document-by-field dbs db field value #:optional (fields #f))
   (define pbody `(("selector" (,field . ,value)) ("limit" . 1)))
   (define body (if fields (acons "fields" fields pbody) pbody))
@@ -121,7 +129,10 @@
       (if (and (vector? val) (= 1 (vector-length val)))
           (vector-ref val 0)
           (error 404))))
-(define (couch-delete-document dbs db id rev)
-  (delete dbs (format #f "~a/~a?rev=~a" db id rev)))
 
 
+
+(define* (couch-set-field-of-document dbs db id field value)
+  (define old (couch-get-document dbs db id))
+  (define new (assoc-set! old field value))
+  (couch-put-document dbs db id new))
