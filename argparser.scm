@@ -12,19 +12,19 @@ Useage:
 (parseargs
   '((#:num "z" "zebra")
     (#:str "y" "yellow")
-    (#:bool "x" "xray")))
+    (#:bool "x" "xray" "rontgenradiation"))) ; multiple long forms are allowed, but the first is used in the parsed alist
 This will return a alist in this form
 '((zebra . #f) (yellow . #f) (xray . 0))
 
 The key is always the long name, the value depends on the type.
 For bool: value is the number of times the flag appears
 For int: value is #f if the name never appears, or the associated
-         value is not a number. Otherwise, its a number representing
-         the desired flag eg. -z=2, --zebra=2, -z 2, or --zebra 2 will
-         all parse to 2
+ value is not a number. Otherwise, its a number representing
+ the desired flag eg. -z=2, --zebra=2, -z 2, or --zebra 2 will
+ all parse to 2
 For str: value is #f if the name never appears. Otherwise, its a
-         string representing the desired flag.
-         eg. -z=2, --zebra=2, -z 2, or --zebra 2 will all parse to 2
+ string representing the desired flag.
+ eg. -z=2, --zebra=2, -z 2, or --zebra 2 will all parse to 2
 |#
 
 (define (parse/prefix short long)
@@ -84,30 +84,42 @@ For str: value is #f if the name never appears. Otherwise, its a
       ((#:str) (parse-str short full))
       ((#:num) (parse-int short full)))))
 
-(define (calc-anon takers data)
-  (if (null? data)
-    '()
-    (if (any
-         (lambda (x) (starts-with (car data) x))
-         takers)
-      (if (string-contains (car data) "=")
-          (calc-anon takers (cdr data))
-          (calc-anon takers (cddr data)))
-      (cons (car data) (calc-anon takers (cdr data))))))
+(define (d v)
+  (display v)
+  (newline)
+  v)
+(define (calc-anon takers1 takers2 data)
+  (cond ((null? data) '())
+        ((any (lambda (x) (starts-with (car data) x)) takers2)
+         (if (string-contains (car data) "=")
+            (calc-anon takers1 takers2 (cdr data))
+            (calc-anon takers1 takers2 (cddr data))))
+        ((any (lambda (x) (starts-with (car data) x)) takers1)
+         (calc-anon takers1 takers2 (cdr data)))
+      (cons (car data) (calc-anon takers1 takers2 (cdr data)))))
 
 (define (anon ops)
-  (define takers
+  (define (taker-maker filt)
     (flatten
      (map (lambda (x)
             (list
              (string-append "-" (second x))
              (string-append "--" (third x))))
-          ops)))
+          (filter filt ops))))
+  (define takers1 (taker-maker (lambda (x) (eq? #:bool (car x)))))
+  (define takers2 (taker-maker (lambda (x) (not (eq? #:bool (car x))))))
   (define data (cdr (command-line)))
-  (calc-anon takers data))
+  (calc-anon takers1 takers2 data))
 
 
 (define (parseargs ops)
   (cons
    `(anon . ,(anon ops))
    (map parse-op ops)))
+
+(display
+  (parseargs
+    '((#:num "z" "zebra")
+      (#:str "y" "yellow")
+      (#:bool "x" "xray"))))
+(newline)
