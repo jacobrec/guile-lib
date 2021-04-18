@@ -92,7 +92,7 @@ For str: value is #f if the name never appears. Otherwise, its a
             (calc-anon takers1 takers2 (cddr data))))
         ((any (lambda (x) (starts-with (car data) x)) takers1)
          (calc-anon takers1 takers2 (cdr data)))
-      (cons (car data) (calc-anon takers1 takers2 (cdr data)))))
+        (else (cons (car data) (calc-anon takers1 takers2 (cdr data))))))
 
 (define (anon ops)
   (define (taker-maker filt)
