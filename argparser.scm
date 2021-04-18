@@ -112,10 +112,3 @@ For str: value is #f if the name never appears. Otherwise, its a
   (cons
    `(anon . ,(anon ops))
    (map parse-op ops)))
-
-(display
-  (parseargs
-    '((#:num "z" "zebra")
-      (#:str "y" "yellow")
-      (#:bool "x" "xray" "rontgenradiadion"))))
-(newline)
