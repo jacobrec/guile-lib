@@ -29,11 +29,11 @@ For str: value is #f if the name never appears. Otherwise, its a
 
 (define (parse/prefix short long)
   (define ss (string-append "-" short))
-  (define sl (string-append "--" long))
+  (define sls (map (lambda (x) (string-append "--" x)) long))
   (cond
-   ((and short long) (parse/or_lit ss sl))
+   ((and short long) (apply parse/or_lit ss sls))
    (short (parse/lit ss))
-   (long (parse/lit sl))))
+   (long (apply parse/or_lit sls))))
 
 (define (parse/arg-with-val pref res-parser)
   (parse/and
@@ -59,7 +59,7 @@ For str: value is #f if the name never appears. Otherwise, its a
                       (conversion (second cl))
                       (third parsed))
                   #f))
-  (cons full out))
+  (cons (car full) out))
 
 (define (parse-bool short full)
  (define pref (parse/prefix short full))
@@ -67,7 +67,7 @@ For str: value is #f if the name never appears. Otherwise, its a
    (reduce + 0
        (map (lambda (x) (if (eq? (pref x) 'parse-error) 0 1))
            (command-line))))
- (cons full count))
+ (cons (car full) count))
 
 (define (parse-int short full)
   (parse-pair short full string->number (parse/int)))
@@ -78,16 +78,12 @@ For str: value is #f if the name never appears. Otherwise, its a
 (define (parse-op op)
   (let ((type (first op))
         (short (second op))
-        (full (third op)))
+        (full (cddr op))) ;; full is the rest of the arguments
     (case type
       ((#:bool) (parse-bool short full))
       ((#:str) (parse-str short full))
       ((#:num) (parse-int short full)))))
 
-(define (d v)
-  (display v)
-  (newline)
-  v)
 (define (calc-anon takers1 takers2 data)
   (cond ((null? data) '())
         ((any (lambda (x) (starts-with (car data) x)) takers2)
@@ -121,5 +117,5 @@ For str: value is #f if the name never appears. Otherwise, its a
   (parseargs
     '((#:num "z" "zebra")
       (#:str "y" "yellow")
-      (#:bool "x" "xray"))))
+      (#:bool "x" "xray" "rontgenradiadion"))))
 (newline)

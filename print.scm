@@ -3,6 +3,7 @@
   #:export (println
             print
             writeln
+            dbg
             ansi-code
             ansi-code-list
 
@@ -20,6 +21,10 @@
             in-box-double
             in-box-thick
             in-box))
+
+(define (dbg v)
+  (println v)
+  v)
 
 (define (writeln x)
   (write x)
