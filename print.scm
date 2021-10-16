@@ -23,7 +23,7 @@
             in-box))
 
 (define (dbg v)
-  (println v)
+  (writeln v)
   v)
 
 (define (writeln x)
@@ -33,7 +33,9 @@
 (define colors
   '((#:BLK . 0) (#:RED . 1) (#:GRN . 2) (#:YEL . 3)
     (#:BLU . 4) (#:MAG . 5) (#:CYN . 6) (#:WHT . 7)
-    (#:RST . 9)))
+    (#:RST . 9)
+    (#:BRIGHT_BLK . 60) (#:BRIGHT_RED . 61) (#:BRIGHT_GRN . 62) (#:BRIGHT_YEL . 63)
+    (#:BRIGHT_BLU . 64) (#:BRIGHT_MAG . 65) (#:BRIGHT_CYN . 66) (#:BRIGHT_WHT . 67)))
 
 (define effects
   '((#:RST . 0)

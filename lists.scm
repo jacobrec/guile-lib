@@ -1,7 +1,9 @@
 (define-module (jlib lists)
+  #:use-module (srfi srfi-1)
   #:export (cartisian-product
             flatten
-            assoc-get))
+            assoc-get
+            alist-merge))
 
 
 (define (flatten x)
@@ -27,3 +29,9 @@
 (define* (assoc-get key alist #:optional default)
   (define v (assoc key alist))
   (if v (cdr v) default))
+
+(define (alist-merge alist newdata)
+  (fold
+   (lambda (x acc)
+     (assoc-set! alist (car x) (cdr x)))
+   alist newdata))
