@@ -25,10 +25,18 @@
             rest)))
   (apply cp (map (λ (x) (list x)) l1) rest))
 
+(define* (assoc-get-nested keylist alist #:optional default)
+  (if (null? keylist)
+      alist
+      (assoc-get-nested (cdr keylist)
+                        (assoc-get (car keylist) alist default)
+                        default)))
 
 (define* (assoc-get key alist #:optional default)
-  (define v (assoc key alist))
-  (if v (cdr v) default))
+  (cond
+   ((list? key) (assoc-get-nested key alist default))
+   (else (let ((v (assoc key alist)))
+           (if v (cdr v) default)))))
 
 (define (alist-merge alist newdata)
   (fold
