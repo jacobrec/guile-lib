@@ -1,12 +1,28 @@
 (define-module (jlib shell)
   #:use-module (ice-9 popen)
   #:use-module (ice-9 textual-ports)
+  #:use-module (texinfo string-utils)
   #:use-module (jlib print)
   #:export (shell
+            shell-escape-string
+            bash-shell
             shell-line
             subprocess
             edit))
 
+(define (shell-escape-string s)
+  (escape-special-chars s
+                        " !@#$%^&*()_+-=;:[{]]|\\'\"`~"
+                        #\\))
+
+;; Runs a bash shell command and returns stdout as a string
+(define (bash-shell cmd)
+  (define command (string-append "/bin/bash -c \"" cmd "\""))
+  ;(write command)
+  (let* ((port (open-input-pipe command))
+         (str  (get-string-all port)))
+    (close-pipe port)
+    (string-trim-right str)))
 ;; Runs a shell command and returns stdout as a string
 (define (shell cmd)
   (let* ((port (open-input-pipe cmd))
